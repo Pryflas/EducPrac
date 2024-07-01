@@ -86,6 +86,10 @@ public abstract class VisualSorter {
         this.rightIndex = index;
     }
 
+    protected void setMidIndex(int index) {
+        this.midIndex = index;
+    }
+
     public int getLeftIndex() {
         return leftIndex;
     }
@@ -94,4 +98,7 @@ public abstract class VisualSorter {
         return rightIndex;
     }
 
+    public int getMidIndex() {
+        return midIndex;
+    }
 }

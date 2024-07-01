@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
+import java.io.CharConversionException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,22 +24,22 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setTitle("Sorting Visualizer");
-        setSize(800, 700);
+        setSize(1500, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         arrayInput = new JTextField();
         delayInput = new JTextField("100");
-        bubbleSortButton = new JButton("Bubble Sort");
-        mergeSortButton = new JButton("Merge Sort");
-        insertionSortButton = new JButton("Insertion Sort");
-        pauseButton = new JButton("Pause");
+        bubbleSortButton = new JButton("Пузырьком");
+        mergeSortButton = new JButton("Слиянием");
+        insertionSortButton = new JButton("Вставками");
+        pauseButton = new JButton("Пауза");
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridLayout(8,2));
-        controlPanel.add(new JLabel("Array (comma-separated or file path):"));
+        controlPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"));
         controlPanel.add(arrayInput);
-        controlPanel.add(new JLabel("Delay (ms):"));
+        controlPanel.add(new JLabel("Введите задержку(мс):"));
         controlPanel.add(delayInput);
         controlPanel.add(bubbleSortButton);
         controlPanel.add(mergeSortButton);
@@ -61,8 +62,10 @@ public class MainFrame extends JFrame {
                             g.setColor(Color.GREEN);
                         } else if (i == currentSorter.getComparedIndex()) {
                             g.setColor(Color.RED);
-                        } else if (i >= currentSorter.getLeftIndex() && i <= currentSorter.getRightIndex()) {
+                        } else if (i >= currentSorter.getLeftIndex() && i <= currentSorter.getMidIndex()) {
                             g.setColor(Color.BLUE);
+                        } else if (i <= currentSorter.getRightIndex() && i >= currentSorter.getMidIndex()) {
+                          g.setColor(Color.CYAN);
                         } else {
                             g.setColor(Color.GRAY);
                         }
@@ -105,30 +108,37 @@ public class MainFrame extends JFrame {
 
         String input = arrayInput.getText().trim();
         if (input.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter an array or file path.");
+            JOptionPane.showMessageDialog(this, "Введите массив или путь к файлу.");
             return;
         }
 
         try {
             currentArray = parseArrayInput(input);
+        } catch (CharConversionException e) {
+            JOptionPane.showMessageDialog(this, "Файл пустой.");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error reading file: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Ошибка чтения файла: " + e.getMessage());
             return;
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid array input.");
+            JOptionPane.showMessageDialog(this, "Неверный формат массива. Введите натуральные числа через запятую.");
             return;
         }
 
         int delay;
         try {
             delay = Integer.parseInt(delayInput.getText().trim());
+            if (delay < 1) {
+                throw new NumberFormatException();
+            }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid delay input.");
+            JOptionPane.showMessageDialog(this, "Неверный формат задержки. Ведите натуральное число");
             return;
         }
 
         commentsArea.setText("");
         sortedArrayField.setText(""); // Очистить поле отсортированного массива
+        paused = false; // Сбросить паузу
+        pauseButton.setText("Пауза"); // Установить текст кнопки на "Pause"
 
         switch (algorithm) {
             case "Bubble":
@@ -153,7 +163,7 @@ public class MainFrame extends JFrame {
 
         paused = !paused;
         currentSorter.setPaused(paused);
-        pauseButton.setText(paused ? "Resume" : "Pause");
+        pauseButton.setText(paused ? "Возобновить" : "Пауза");
     }
 
     private int[] parseArrayInput(String input) throws IOException {
@@ -162,11 +172,17 @@ public class MainFrame extends JFrame {
             int[] array = new int[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 array[i] = Integer.parseInt(parts[i].trim());
+                if (array[i] < 0){
+                    throw new NumberFormatException();
+                }
             }
             return array;
         } else {
             BufferedReader reader = new BufferedReader(new FileReader(input));
             String line = reader.readLine();
+            if (line == null || line.trim().isEmpty()) {
+                throw new IOException("Файл пустой.");
+            }
             reader.close();
             String[] parts = line.split(",");
             int[] array = new int[parts.length];

@@ -13,10 +13,10 @@ public class InsertionSortVisualizer extends VisualSorter {
             int key = array[i];
             setHighlightedIndex(i);
             int j = i - 1;
-            addComment("Inserting element: " + key);
+            addComment("Вставка элементов: " + key);
             while (j >= 0 && array[j] > key) {
                 setComparedIndex(j);
-                addComment("Comparing elements: " + array[j] + " and " + key);
+                addComment("Сравнение элементов: " + array[j] + " и " + key);
                 array[j + 1] = array[j];
                 j = j - 1;
                 pauseIfNeeded();
@@ -30,7 +30,7 @@ public class InsertionSortVisualizer extends VisualSorter {
         }
         setHighlightedIndex(-1); // Убираем подсветку после завершения сортировки
         setComparedIndex(-1);
-        addComment("Array is sorted: " + Arrays.toString(array));
+        addComment("Отсортированный массив: " + Arrays.toString(array));
         setSortedArray(array);
         updatePanel();
     }

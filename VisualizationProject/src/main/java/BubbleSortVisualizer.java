@@ -15,9 +15,9 @@ public class BubbleSortVisualizer extends VisualSorter {
             for (int i = 0; i < n - 1; i++) {
                 setHighlightedIndex(i);
                 setComparedIndex(i + 1);
-                addComment("Comparing elements: " + array[i] + " and " + array[i + 1]);
+                addComment("Сравнение элементов: " + array[i] + " и " + array[i + 1]);
                 if (array[i] > array[i + 1]) {
-                    addComment("Swapping elements: " + array[i] + " and " + array[i + 1]);
+                    addComment("Обмен элементов: " + array[i] + " и " + array[i + 1]);
                     int temp = array[i];
                     array[i] = array[i + 1];
                     array[i + 1] = temp;
@@ -31,7 +31,7 @@ public class BubbleSortVisualizer extends VisualSorter {
         } while (swapped);
         setHighlightedIndex(-1); // Убираем подсветку после завершения сортировки
         setComparedIndex(-1);
-        addComment("Array is sorted: " + Arrays.toString(array));
+        addComment("Отсортированный массив: " + Arrays.toString(array));
         setSortedArray(array);
         updatePanel();
     }

@@ -11,7 +11,7 @@ public class MergeSortVisualizer extends VisualSorter {
         mergeSort(0, array.length - 1);
         setHighlightedIndex(-1);
         setComparedIndex(-1);
-        addComment("Array is sorted: " + Arrays.toString(array));
+        addComment("Отсортированный массив: " + Arrays.toString(array));
         setSortedArray(array);
         updatePanel();
     }
@@ -29,6 +29,7 @@ public class MergeSortVisualizer extends VisualSorter {
         int n1 = middle - left + 1;
         int n2 = right - middle;
         setLeftIndex(left);
+        setMidIndex(middle);
         setRightIndex(right);
         int[] leftArray = new int[n1];
         int[] rightArray = new int[n2];
@@ -37,16 +38,16 @@ public class MergeSortVisualizer extends VisualSorter {
         System.arraycopy(array, middle + 1, rightArray, 0, n2);
 
         int i = 0, j = 0, k = left;
-        addComment("Merging sub-arrays: " + Arrays.toString(leftArray) + " and " + Arrays.toString(rightArray) + ":");
+        addComment("Слияние подмассивов: " + Arrays.toString(leftArray) + " и " + Arrays.toString(rightArray) + ":");
         while (i < n1 && j < n2) {
             setHighlightedIndex(k);
 //            setComparedIndex(-1);
             if (leftArray[i] <= rightArray[j]) {
-                addComment("Inserting " + leftArray[i] + " into position " + k);
+                addComment("Вставка " + leftArray[i] + " в позицию " + k);
                 array[k] = leftArray[i];
                 i++;
             } else {
-                addComment("Inserting " + rightArray[j] + " into position " + k);
+                addComment("Вставка " + rightArray[j] + " в позицию " + k);
                 array[k] = rightArray[j];
                 j++;
             }
@@ -59,7 +60,7 @@ public class MergeSortVisualizer extends VisualSorter {
         while (i < n1) {
             setHighlightedIndex(k);
 
-            addComment("Inserting " + leftArray[i] + " into position " + k);
+            addComment("Вставка " + leftArray[i] + " в позицию " + k);
             array[k] = leftArray[i];
             i++;
             k++;
@@ -71,7 +72,7 @@ public class MergeSortVisualizer extends VisualSorter {
         while (j < n2) {
             setHighlightedIndex(k);
 
-            addComment("Inserting " + rightArray[j] + " into position " + k);
+            addComment("Вставка " + rightArray[j] + " в позицию " + k);
             array[k] = rightArray[j];
             j++;
             k++;
