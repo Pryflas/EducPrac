@@ -1,45 +1,97 @@
 import javax.swing.*;
+import java.util.Arrays;
 
 public abstract class VisualSorter {
     protected int[] array;
     protected JPanel panel;
     protected JTextArea commentsArea;
-    protected JScrollPane commentsScrollPane;
     protected int delay;
-    protected int highlightedIndex = -1;
-    protected boolean paused = false;
+    protected JScrollPane commentsScrollPane;
+    protected JTextField sortedArrayField;
+    private int highlightedIndex = -1;
+    private int comparedIndex = -1;
+    private int leftIndex = -1;
+    private int midIndex = -1;
+    private int rightIndex = -1;
+    private volatile boolean paused = false;
 
-    public VisualSorter(int[] array, JPanel panel, JTextArea commentsArea, int delay, JScrollPane commentsScrollPane) {
+    public VisualSorter(int[] array, JPanel panel, JTextArea commentsArea, int delay, JScrollPane commentsScrollPane, JTextField sortedArrayField) {
         this.array = array;
         this.panel = panel;
         this.commentsArea = commentsArea;
         this.delay = delay;
         this.commentsScrollPane = commentsScrollPane;
+        this.sortedArrayField = sortedArrayField;
     }
 
     public abstract void sort();
 
-    protected void waitIfPaused() {
-        while (paused) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    protected void sleep() {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
-    public void setPaused(boolean paused) {
-        this.paused = paused;
+    protected void updatePanel() {
+        panel.repaint();
+    }
+
+    protected void addComment(String comment) {
+        commentsArea.append(comment + "\n");
+        JScrollBar vertical = commentsScrollPane.getVerticalScrollBar();
+        vertical.setValue(vertical.getMaximum());
+    }
+
+    protected void setHighlightedIndex(int index) {
+        this.highlightedIndex = index;
     }
 
     public int getHighlightedIndex() {
         return highlightedIndex;
     }
 
-    protected void appendComment(String comment) {
-        commentsArea.append(comment);
-        JScrollBar verticalScrollBar = commentsScrollPane.getVerticalScrollBar();
-        verticalScrollBar.setValue(verticalScrollBar.getMaximum());
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
+
+    protected void pauseIfNeeded() {
+        while (paused) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    protected void setSortedArray(int[] array) {
+        sortedArrayField.setText(Arrays.toString(array));
+    }
+
+    public int getComparedIndex() {
+        return comparedIndex;
+    }
+
+    protected void setComparedIndex(int index) {
+        this.comparedIndex = index;
+    }
+
+    protected void setLeftIndex(int index) {
+        this.leftIndex = index;
+    }
+
+    protected void setRightIndex(int index) {
+        this.rightIndex = index;
+    }
+
+    public int getLeftIndex() {
+        return leftIndex;
+    }
+
+    public int getRightIndex() {
+        return rightIndex;
+    }
+
 }

@@ -1,84 +1,72 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MainFrame extends JFrame {
-    private JTextField arrayInput;
-    private JTextField delayInput;
-    private JButton bubbleSortButton;
-    private JButton mergeSortButton;
-    private JButton insertionSortButton;
-    private JButton pauseButton;
-    private JPanel panel;
-    private JTextArea commentsArea;
-    private JScrollPane commentsScrollPane;
+    private final JTextField arrayInput;
+    private final JTextField delayInput;
+    private final JButton bubbleSortButton;
+    private final JButton mergeSortButton;
+    private final JButton insertionSortButton;
+    private final JButton pauseButton;
+    private final JPanel panel;
+    private final JTextArea commentsArea;
+    private final JScrollPane commentsScrollPane;
+    private final JTextField sortedArrayField;
     private int[] currentArray;
     private VisualSorter currentSorter = null; // Текущий визуализатор сортировки
-    private volatile boolean paused = false;
+    private  boolean paused = false;
     private Thread currentSortingThread = null; // Ссылка на текущий поток сортировки
 
     public MainFrame() {
         setTitle("Sorting Visualizer");
-        setSize(800, 600);
+        setSize(800, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         arrayInput = new JTextField();
         delayInput = new JTextField("100");
-        bubbleSortButton = new JButton("Пузырьком");
-        mergeSortButton = new JButton("Слиянием");
-        insertionSortButton = new JButton("Вставками");
-        pauseButton = new JButton("Пауза");
-
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(4, 2));
-        inputPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"));
-        inputPanel.add(arrayInput);
-        inputPanel.add(new JLabel("Введите задержку(мс):"));
-        inputPanel.add(delayInput);
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        bubbleSortButton.setPreferredSize(new Dimension(150, 40));
-        mergeSortButton.setPreferredSize(new Dimension(150, 40));
-        insertionSortButton.setPreferredSize(new Dimension(150, 40));
-        pauseButton.setPreferredSize(new Dimension(150, 40));
-        buttonPanel.add(bubbleSortButton);
-        buttonPanel.add(mergeSortButton);
-        buttonPanel.add(insertionSortButton);
-        buttonPanel.add(pauseButton);
+        bubbleSortButton = new JButton("Bubble Sort");
+        mergeSortButton = new JButton("Merge Sort");
+        insertionSortButton = new JButton("Insertion Sort");
+        pauseButton = new JButton("Pause");
 
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new BorderLayout());
-        controlPanel.add(inputPanel, BorderLayout.NORTH);
-        controlPanel.add(buttonPanel, BorderLayout.CENTER);
+        controlPanel.setLayout(new GridLayout(8,2));
+        controlPanel.add(new JLabel("Array (comma-separated or file path):"));
+        controlPanel.add(arrayInput);
+        controlPanel.add(new JLabel("Delay (ms):"));
+        controlPanel.add(delayInput);
+        controlPanel.add(bubbleSortButton);
+        controlPanel.add(mergeSortButton);
+        controlPanel.add(insertionSortButton);
+        controlPanel.add(pauseButton);
 
         panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 if (currentArray != null) {
-                    int width = getWidth();
-                    int height = getHeight();
-                    int barWidth = width / currentArray.length;
-                    int maxValue = Integer.MIN_VALUE;
-                    for (int value : currentArray) {
-                        if (value > maxValue) {
-                            maxValue = value;
-                        }
-                    }
+                    int width = getWidth() / currentArray.length;
+                    int maxHeight = getHeight();
+                    int maxArrayValue = Arrays.stream(currentArray).max().orElse(1);
+
                     for (int i = 0; i < currentArray.length; i++) {
-                        if (currentSorter != null && i == currentSorter.getHighlightedIndex()) {
+                        int height = (int) (((double) currentArray[i] / maxArrayValue) * maxHeight);
+
+                        if (i == currentSorter.getHighlightedIndex()) {
                             g.setColor(Color.GREEN);
-                        } else {
+                        } else if (i == currentSorter.getComparedIndex()) {
+                            g.setColor(Color.RED);
+                        } else if (i >= currentSorter.getLeftIndex() && i <= currentSorter.getRightIndex()) {
                             g.setColor(Color.BLUE);
+                        } else {
+                            g.setColor(Color.GRAY);
                         }
-                        int barHeight = (int) (((double) currentArray[i] / maxValue) * height);
-                        g.fillRect(i * barWidth, height - barHeight, barWidth, barHeight);
+                        g.fillRect(i * width, getHeight() - height, width, height);
                     }
                 }
             }
@@ -87,104 +75,112 @@ public class MainFrame extends JFrame {
 
         commentsArea = new JTextArea();
         commentsArea.setEditable(false);
-
         commentsScrollPane = new JScrollPane(commentsArea);
-        commentsScrollPane.setPreferredSize(new Dimension(800, 100));
+        commentsScrollPane.setPreferredSize(new Dimension(800, 150));
+
+        sortedArrayField = new JTextField();
+        sortedArrayField.setEditable(false);
+        sortedArrayField.setPreferredSize(new Dimension(800, 50));
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.add(commentsScrollPane, BorderLayout.CENTER);
+        bottomPanel.add(sortedArrayField, BorderLayout.SOUTH);
 
         add(controlPanel, BorderLayout.NORTH);
         add(panel, BorderLayout.CENTER);
-        add(commentsScrollPane, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        bubbleSortButton.addActionListener(new SortButtonListener());
-        mergeSortButton.addActionListener(new SortButtonListener());
-        insertionSortButton.addActionListener(new SortButtonListener());
-        pauseButton.addActionListener(e -> {
-            paused = !paused;
-            if (currentSorter != null) {
-                currentSorter.setPaused(paused);
-            }
-        });
+        bubbleSortButton.addActionListener(e -> startSorting("Bubble"));
+        mergeSortButton.addActionListener(e -> startSorting("Merge"));
+        insertionSortButton.addActionListener(e -> startSorting("Insertion"));
+        pauseButton.addActionListener(e -> togglePause());
     }
 
-    private class SortButtonListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            // Прерываем текущую сортировку, если она выполняется
-            if (currentSortingThread != null && currentSortingThread.isAlive()) {
-                currentSortingThread.interrupt();
-            }
+    private void startSorting(String algorithm) {
+        if (currentSortingThread != null && currentSortingThread.isAlive()) {
+            currentSorter.setPaused(true); // Остановить текущую сортировку
+            currentSortingThread.interrupt(); // Прервать текущий поток
+        }
 
-            String inputText = arrayInput.getText().trim();
+        String input = arrayInput.getText().trim();
+        if (input.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter an array or file path.");
+            return;
+        }
 
-            if (inputText.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Введите массив или путь к файлу.");
-                return;
-            }
+        try {
+            currentArray = parseArrayInput(input);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error reading file: " + e.getMessage());
+            return;
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid array input.");
+            return;
+        }
 
-            if (inputText.contains(",")) {
-                String[] input = inputText.split(",");
-                currentArray = new int[input.length];
-                try {
-                    for (int i = 0; i < input.length; i++) {
-                        currentArray[i] = Integer.parseInt(input[i].trim());
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Неверный формат массива. Введите натуральные числа разделенные запятой.");
-                    return;
-                }
-            } else {
-                try (BufferedReader br = new BufferedReader(new FileReader(inputText))) {
-                    String line = br.readLine();
-                    if (line != null) {
-                        String[] input = line.split(",");
-                        currentArray = new int[input.length];
-                        for (int i = 0; i < input.length; i++) {
-                            currentArray[i] = Integer.parseInt(input[i].trim());
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Файл пустой.");
-                        return;
-                    }
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, "Ошибка чтения файла. Проверьте путь к файлу.");
-                    return;
-                }
-            }
+        int delay;
+        try {
+            delay = Integer.parseInt(delayInput.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid delay input.");
+            return;
+        }
 
-            int delay;
-            try {
-                delay = Integer.parseInt(delayInput.getText().trim());
-                if (delay < 1) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Неверный формат задержки. Введите натуральное число.");
-                return;
-            }
+        commentsArea.setText("");
+        sortedArrayField.setText(""); // Очистить поле отсортированного массива
 
-            if (e.getSource() == bubbleSortButton) {
-                currentSortingThread = new Thread(() -> {
-                    currentSorter = new BubbleSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane);
-                    currentSorter.sort();
-                });
-                currentSortingThread.start();
-            } else if (e.getSource() == mergeSortButton) {
-                currentSortingThread = new Thread(() -> {
-                    currentSorter = new MergeSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane);
-                    currentSorter.sort();
-                });
-                currentSortingThread.start();
-            } else if (e.getSource() == insertionSortButton) {
-                currentSortingThread = new Thread(() -> {
-                    currentSorter = new InsertionSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane);
-                    currentSorter.sort();
-                });
-                currentSortingThread.start();
+        switch (algorithm) {
+            case "Bubble":
+                currentSorter = new BubbleSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane, sortedArrayField);
+                break;
+            case "Merge":
+                currentSorter = new MergeSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane, sortedArrayField);
+                break;
+            case "Insertion":
+                currentSorter = new InsertionSortVisualizer(currentArray, panel, commentsArea, delay, commentsScrollPane, sortedArrayField);
+                break;
+        }
+
+        currentSortingThread = new Thread(() -> currentSorter.sort());
+        currentSortingThread.start();
+    }
+
+    private void togglePause() {
+        if (currentSorter == null) {
+            return;
+        }
+
+        paused = !paused;
+        currentSorter.setPaused(paused);
+        pauseButton.setText(paused ? "Resume" : "Pause");
+    }
+
+    private int[] parseArrayInput(String input) throws IOException {
+        if (input.contains(",")) {
+            String[] parts = input.split(",");
+            int[] array = new int[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                array[i] = Integer.parseInt(parts[i].trim());
             }
+            return array;
+        } else {
+            BufferedReader reader = new BufferedReader(new FileReader(input));
+            String line = reader.readLine();
+            reader.close();
+            String[] parts = line.split(",");
+            int[] array = new int[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                array[i] = Integer.parseInt(parts[i].trim());
+            }
+            return array;
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            frame.setVisible(true);
+        });
     }
 }

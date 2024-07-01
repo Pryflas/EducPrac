@@ -1,88 +1,83 @@
 import javax.swing.*;
+import java.util.Arrays;
 
 public class MergeSortVisualizer extends VisualSorter {
-
-    public MergeSortVisualizer(int[] array, JPanel panel, JTextArea commentsArea, int delay, JScrollPane commentsScrollPane) {
-        super(array, panel, commentsArea, delay, commentsScrollPane);
+    public MergeSortVisualizer(int[] array, JPanel panel, JTextArea commentsArea, int delay, JScrollPane commentsScrollPane, JTextField sortedArrayField) {
+        super(array, panel, commentsArea, delay, commentsScrollPane, sortedArrayField);
     }
 
     @Override
     public void sort() {
-        new Thread(() -> {
-            try {
-                mergeSort(array, 0, array.length - 1);
-                highlightedIndex = -1;
-                panel.repaint();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        mergeSort(0, array.length - 1);
+        setHighlightedIndex(-1);
+        setComparedIndex(-1);
+        addComment("Array is sorted: " + Arrays.toString(array));
+        setSortedArray(array);
+        updatePanel();
     }
 
-    private void mergeSort(int[] array, int left, int right) throws InterruptedException {
+    private void mergeSort(int left, int right) {
         if (left < right) {
             int middle = (left + right) / 2;
-
-            mergeSort(array, left, middle);
-            mergeSort(array, middle + 1, right);
-
-            merge(array, left, middle, right);
+            mergeSort(left, middle);
+            mergeSort(middle + 1, right);
+            merge(left, middle, right);
         }
     }
 
-    private void merge(int[] array, int left, int middle, int right) throws InterruptedException {
+    private void merge(int left, int middle, int right) {
         int n1 = middle - left + 1;
         int n2 = right - middle;
+        setLeftIndex(left);
+        setRightIndex(right);
+        int[] leftArray = new int[n1];
+        int[] rightArray = new int[n2];
 
-        int[] L = new int[n1];
-        int[] R = new int[n2];
+        System.arraycopy(array, left, leftArray, 0, n1);
+        System.arraycopy(array, middle + 1, rightArray, 0, n2);
 
-        for (int i = 0; i < n1; ++i) {
-            L[i] = array[left + i];
-        }
-        for (int j = 0; j < n2; ++j) {
-            R[j] = array[middle + 1 + j];
-        }
-
-        int i = 0, j = 0;
-        int k = left;
+        int i = 0, j = 0, k = left;
+        addComment("Merging sub-arrays: " + Arrays.toString(leftArray) + " and " + Arrays.toString(rightArray) + ":");
         while (i < n1 && j < n2) {
-            highlightedIndex = k;
-            if (L[i] <= R[j]) {
-                appendComment("Inserting " + L[i] + " into position " + k + "\n");
-                array[k] = L[i];
+            setHighlightedIndex(k);
+//            setComparedIndex(-1);
+            if (leftArray[i] <= rightArray[j]) {
+                addComment("Inserting " + leftArray[i] + " into position " + k);
+                array[k] = leftArray[i];
                 i++;
             } else {
-                appendComment("Inserting " + R[j] + " into position " + k + "\n");
-                array[k] = R[j];
+                addComment("Inserting " + rightArray[j] + " into position " + k);
+                array[k] = rightArray[j];
                 j++;
             }
-            panel.repaint();
-            Thread.sleep(delay);
-            waitIfPaused();
             k++;
+            pauseIfNeeded();
+            sleep();
+            updatePanel();
         }
 
         while (i < n1) {
-            highlightedIndex = k;
-            appendComment("Inserting " + L[i] + " into position " + k + "\n");
-            array[k] = L[i];
+            setHighlightedIndex(k);
+
+            addComment("Inserting " + leftArray[i] + " into position " + k);
+            array[k] = leftArray[i];
             i++;
             k++;
-            panel.repaint();
-            Thread.sleep(delay);
-            waitIfPaused();
+            pauseIfNeeded();
+            sleep();
+            updatePanel();
         }
 
         while (j < n2) {
-            highlightedIndex = k;
-            appendComment("Inserting " + R[j] + " into position " + k + "\n");
-            array[k] = R[j];
+            setHighlightedIndex(k);
+
+            addComment("Inserting " + rightArray[j] + " into position " + k);
+            array[k] = rightArray[j];
             j++;
             k++;
-            panel.repaint();
-            Thread.sleep(delay);
-            waitIfPaused();
+            pauseIfNeeded();
+            sleep();
+            updatePanel();
         }
     }
 }
