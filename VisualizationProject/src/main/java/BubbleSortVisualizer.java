@@ -13,10 +13,10 @@ public class BubbleSortVisualizer extends VisualSorter {
         do {
             swapped = false;
             for (int i = 0; i < n - 1; i++) {
-                setHighlightedIndex(i);
-                setComparedIndex(i + 1);
                 addComment("Сравнение элементов: " + array[i] + " и " + array[i + 1]);
                 if (array[i] > array[i + 1]) {
+                    setHighlightedIndex(i);
+                    setComparedIndex(i + 1);
                     addComment("Обмен элементов: " + array[i] + " и " + array[i + 1]);
                     int temp = array[i];
                     array[i] = array[i + 1];
@@ -24,10 +24,10 @@ public class BubbleSortVisualizer extends VisualSorter {
                     swapped = true;
 
                 } else {
-                    if (i > 2){
-                        setBubbleIndex(i-2);
-                        setBubbleIndex2(i-1);
-                    }
+
+                        setBubbleIndex(i-1);
+                        setBubbleIndex2(i);
+
                 }
                 updatePanel();
                 pauseIfNeeded();

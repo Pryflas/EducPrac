@@ -20,8 +20,12 @@ public class InsertionSortVisualizer extends VisualSorter {
             while (j >= 0 && array[j] > key) {
                 setComparedIndex(j);
                 array[j + 1] = array[j];
+                addComment("Шаг 1: Сдвиг элемента " + array[j] + " на позицию вправо");
                 j = j - 1;
-                addComment("Вставка элемента: " + key + " перед " + array[j+1]);
+                addComment("Шаг 2: Сравнение элементов: " + key + " и " + array[j+1]);
+                if (array[j] <= key){
+                    addComment("Вставка: " + key + " перед " + array[j+1]);
+                }
                 pauseIfNeeded();
                 sleep();
                 updatePanel();
