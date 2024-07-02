@@ -30,21 +30,76 @@ public class MainFrame extends JFrame {
 
         arrayInput = new JTextField();
         delayInput = new JTextField("100");
+
         bubbleSortButton = new JButton("Пузырьком");
         mergeSortButton = new JButton("Слиянием");
         insertionSortButton = new JButton("Вставками");
         pauseButton = new JButton("Пауза");
 
+//        JPanel controlPanel = new JPanel();
+//        controlPanel.setLayout(new GridLayout(8,2));
+//        controlPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"));
+//        controlPanel.add(arrayInput);
+//        controlPanel.add(new JLabel("Введите задержку(мс):"));
+//        controlPanel.add(delayInput);
+//        controlPanel.add(pauseButton);
+//        controlPanel.add(bubbleSortButton);
+//        controlPanel.add(mergeSortButton);
+//        controlPanel.add(insertionSortButton);
+
+
+        bubbleSortButton.setPreferredSize(new Dimension(450, 30));
+        mergeSortButton.setPreferredSize(new Dimension(450, 30));
+        insertionSortButton.setPreferredSize(new Dimension(450, 30));
+        pauseButton.setPreferredSize(new Dimension(100, 20));
+
+
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(8,2));
-        controlPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"));
-        controlPanel.add(arrayInput);
-        controlPanel.add(new JLabel("Введите задержку(мс):"));
-        controlPanel.add(delayInput);
-        controlPanel.add(bubbleSortButton);
-        controlPanel.add(mergeSortButton);
-        controlPanel.add(insertionSortButton);
-        controlPanel.add(pauseButton);
+        controlPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        controlPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        controlPanel.add(arrayInput, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        controlPanel.add(new JLabel("Введите задержку(мс):"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        controlPanel.add(delayInput, gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        controlPanel.add(pauseButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        controlPanel.add(bubbleSortButton, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        controlPanel.add(mergeSortButton, gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        controlPanel.add(insertionSortButton, gbc);
+
+
 
         panel = new JPanel() {
             @Override
@@ -62,7 +117,7 @@ public class MainFrame extends JFrame {
                             g.setColor(Color.GREEN);
                         } else if (i == currentSorter.getComparedIndex()) {
                             g.setColor(Color.RED);
-                        } else if (i >= currentSorter.getLeftIndex() && i <= currentSorter.getMidIndex()) {
+                        } else if ((i >= currentSorter.getLeftIndex() && i <= currentSorter.getMidIndex()) || i == currentSorter.getBubbleIndex() || i == currentSorter.getBubbleIndex2()) {
                             g.setColor(Color.BLUE);
                         } else if (i <= currentSorter.getRightIndex() && i >= currentSorter.getMidIndex()) {
                           g.setColor(Color.CYAN);
@@ -164,6 +219,26 @@ public class MainFrame extends JFrame {
         paused = !paused;
         currentSorter.setPaused(paused);
         pauseButton.setText(paused ? "Возобновить" : "Пауза");
+
+        if (!paused) {
+            // Обновить задержку при возобновлении
+            int delay;
+            try {
+                delay = Integer.parseInt(delayInput.getText().trim());
+                if (delay < 1) {
+                    throw new NumberFormatException();
+                }
+                currentSorter.setDelay(delay);
+            } catch (NumberFormatException e) {
+                paused = true;
+                currentSorter.setPaused(paused);
+                pauseButton.setText(paused ? "Возобновить" : "Пауза");
+
+                JOptionPane.showMessageDialog(this, "Неверный формат задержки. Ведите натуральное число");
+
+            }
+        }
+
     }
 
     private int[] parseArrayInput(String input) throws IOException {

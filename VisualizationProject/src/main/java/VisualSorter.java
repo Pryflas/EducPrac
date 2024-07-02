@@ -13,6 +13,8 @@ public abstract class VisualSorter {
     private int leftIndex = -1;
     private int midIndex = -1;
     private int rightIndex = -1;
+    private int BubbleIndex = -1;
+    private int BubbleIndex2 = -1;
     private volatile boolean paused = false;
 
     public VisualSorter(int[] array, JPanel panel, JTextArea commentsArea, int delay, JScrollPane commentsScrollPane, JTextField sortedArrayField) {
@@ -34,8 +36,15 @@ public abstract class VisualSorter {
         }
     }
 
+
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
+
     protected void updatePanel() {
         panel.repaint();
+
     }
 
     protected void addComment(String comment) {
@@ -100,5 +109,21 @@ public abstract class VisualSorter {
 
     public int getMidIndex() {
         return midIndex;
+    }
+
+    public void setBubbleIndex(int index) {
+        this.BubbleIndex = index;
+    }
+
+    public int getBubbleIndex() {
+        return BubbleIndex;
+    }
+
+    public void setBubbleIndex2(int index) {
+        this.BubbleIndex2 = index;
+    }
+
+    public int getBubbleIndex2() {
+        return BubbleIndex2;
     }
 }

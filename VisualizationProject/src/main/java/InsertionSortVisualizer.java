@@ -11,14 +11,17 @@ public class InsertionSortVisualizer extends VisualSorter {
         int n = array.length;
         for (int i = 1; i < n; ++i) {
             int key = array[i];
-            setHighlightedIndex(i);
+
             int j = i - 1;
-            addComment("Вставка элементов: " + key);
+
+            addComment("Сравнение элементов: " + array[j] + " и " + key);
+            setHighlightedIndex(i);
+            setComparedIndex(j);
             while (j >= 0 && array[j] > key) {
                 setComparedIndex(j);
-                addComment("Сравнение элементов: " + array[j] + " и " + key);
                 array[j + 1] = array[j];
                 j = j - 1;
+                addComment("Вставка элемента: " + key + " перед " + array[j+1]);
                 pauseIfNeeded();
                 sleep();
                 updatePanel();

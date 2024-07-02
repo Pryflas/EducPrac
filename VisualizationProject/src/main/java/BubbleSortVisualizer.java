@@ -22,13 +22,21 @@ public class BubbleSortVisualizer extends VisualSorter {
                     array[i] = array[i + 1];
                     array[i + 1] = temp;
                     swapped = true;
-                    updatePanel();
+
+                } else {
+                    if (i > 2){
+                        setBubbleIndex(i-2);
+                        setBubbleIndex2(i-1);
+                    }
                 }
+                updatePanel();
                 pauseIfNeeded();
                 sleep();
             }
             n--;
         } while (swapped);
+        setBubbleIndex(-1);
+        setBubbleIndex2(-1);
         setHighlightedIndex(-1); // Убираем подсветку после завершения сортировки
         setComparedIndex(-1);
         addComment("Отсортированный массив: " + Arrays.toString(array));
