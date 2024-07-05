@@ -36,15 +36,12 @@ public abstract class VisualSorter {
         }
     }
 
-
-
     public void setDelay(int delay) {
         this.delay = delay;
     }
 
     protected void updatePanel() {
         panel.repaint();
-
     }
 
     protected void addComment(String comment) {

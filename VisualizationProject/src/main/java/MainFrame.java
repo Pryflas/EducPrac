@@ -36,17 +36,6 @@ public class MainFrame extends JFrame {
         insertionSortButton = new JButton("Вставками");
         pauseButton = new JButton("Пауза");
 
-//        JPanel controlPanel = new JPanel();
-//        controlPanel.setLayout(new GridLayout(8,2));
-//        controlPanel.add(new JLabel("Введите массив натуральных чисел через запятую или абсолютный путь к файлу:"));
-//        controlPanel.add(arrayInput);
-//        controlPanel.add(new JLabel("Введите задержку(мс):"));
-//        controlPanel.add(delayInput);
-//        controlPanel.add(pauseButton);
-//        controlPanel.add(bubbleSortButton);
-//        controlPanel.add(mergeSortButton);
-//        controlPanel.add(insertionSortButton);
-
 
         bubbleSortButton.setPreferredSize(new Dimension(450, 30));
         mergeSortButton.setPreferredSize(new Dimension(450, 30));
@@ -129,16 +118,15 @@ public class MainFrame extends JFrame {
                 }
             }
         };
-        panel.setPreferredSize(new Dimension(800, 400));
 
         commentsArea = new JTextArea();
         commentsArea.setEditable(false);
         commentsScrollPane = new JScrollPane(commentsArea);
-        commentsScrollPane.setPreferredSize(new Dimension(800, 150));
+        commentsScrollPane.setPreferredSize(new Dimension(1500, 150));
 
         sortedArrayField = new JTextField();
         sortedArrayField.setEditable(false);
-        sortedArrayField.setPreferredSize(new Dimension(800, 50));
+        sortedArrayField.setPreferredSize(new Dimension(1500, 50));
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
@@ -263,6 +251,9 @@ public class MainFrame extends JFrame {
             int[] array = new int[parts.length];
             for (int i = 0; i < parts.length; i++) {
                 array[i] = Integer.parseInt(parts[i].trim());
+                if (array[i] < 0){
+                    throw new NumberFormatException();
+                }
             }
             return array;
         }
